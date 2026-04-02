@@ -127,7 +127,7 @@ export default function QREngine({
   const drawSize = size + (pad * 2);
 
   return (
-    <View style={{ overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
+    <View nativeID="qr-svg-container" style={{ overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={drawSize} height={drawSize + (frame === 'text' ? 20 : 0)} viewBox={`0 0 ${drawSize} ${drawSize + (frame === 'text' ? 20 : 0)}`}>
         <Defs>
            {design === 10 && <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1"><Stop offset="0%" stopColor={fgColor} /><Stop offset="100%" stopColor={gradColor} /></LinearGradient>}

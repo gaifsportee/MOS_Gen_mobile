@@ -68,6 +68,50 @@ export default function App() {
     } catch (err: any) { Alert.alert('PDF Error', err.message); }
   };
 
+  const downloadQRAsSVG = () => {
+    if (typeof document === 'undefined') return Alert.alert('Not available', 'Download only works in browser.');
+    const container = document.getElementById('qr-svg-container');
+    const svgEl = container?.querySelector('svg');
+    if (!svgEl) return Alert.alert('Error', 'QR not ready yet.');
+    const serializer = new XMLSerializer();
+    const svgStr = serializer.serializeToString(svgEl);
+    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `mosgen_qr_style${qrDesign}.svg`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  };
+
+  const downloadQRAsPNG = () => {
+    if (typeof document === 'undefined') return Alert.alert('Not available', 'Download only works in browser.');
+    const container = document.getElementById('qr-svg-container');
+    const svgEl = container?.querySelector('svg');
+    if (!svgEl) return Alert.alert('Error', 'QR not ready yet.');
+    const serializer = new XMLSerializer();
+    const svgStr = serializer.serializeToString(svgEl);
+    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const DOMURL = window.URL || window.webkitURL || window;
+    const url = DOMURL.createObjectURL(svgBlob);
+    const img = new Image();
+    const svgW = svgEl.width?.baseVal?.value || qrSize;
+    const svgH = svgEl.height?.baseVal?.value || qrSize;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = svgW * 2; canvas.height = svgH * 2;
+      const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      DOMURL.revokeObjectURL(url);
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `mosgen_qr_style${qrDesign}.png`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    };
+    img.src = url;
+  };
+
   // Cross-Platform Native OS Color Wheel Picker Component
   const NativeColorPicker = ({ color, onChange, label }: { color: string, onChange: (c:string)=>void, label: string }) => {
      if (Platform.OS === 'web') {
@@ -191,6 +235,16 @@ export default function App() {
              frame={frame} frameText={frameText} frameColor={frameColor}
              ecLevel={ecLevel} quietZone={quietZone}
            />
+        </View>
+
+        {/* Download Buttons */}
+        <View style={[styles.row, {marginTop: 16}]}>
+          <TouchableOpacity style={[styles.btnPrimary, {flex: 1}]} onPress={downloadQRAsPNG}>
+            <Text style={styles.btnPrimaryText}>⬇ Download PNG</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.btnOutline, {flex: 1, alignItems: 'center'}]} onPress={downloadQRAsSVG}>
+            <Text style={styles.btnOutlineText}>⬇ Download SVG</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
